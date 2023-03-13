@@ -1,4 +1,4 @@
-package delta
+package deltalake
 
 import (
 	"deltalake/storage"

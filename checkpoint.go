@@ -1,4 +1,4 @@
-package delta
+package deltalake
 
 type Checkpoint struct {
 	// Version is the version of the delta table.
