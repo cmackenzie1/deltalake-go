@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"fmt"
 	"io"
+	"net/url"
 	"time"
 )
 
@@ -29,4 +31,18 @@ type ObjectStorage interface {
 	List(prefix string) ([]ObjectInfo, error)
 	// RootURI returns the root URI of the storage.
 	RootURI() string
+}
+
+func WhichStorageProvider(uri string) (string, error) {
+	if uri == "" {
+		return "", fmt.Errorf("memory storage not supported")
+	}
+	u, err := url.Parse(uri)
+	if err != nil {
+		return "", err
+	}
+	if u.Scheme == "" {
+		return "file", nil
+	}
+	return u.Scheme, nil
 }
