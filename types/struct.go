@@ -25,6 +25,15 @@ func (t *StructType) AddField(field *StructField) {
 	t.Fields = append(t.Fields, field)
 }
 
+func (t *StructType) GetFieldByName(name string) (*StructField, error) {
+	for _, field := range t.Fields {
+		if field.Name == name {
+			return field, nil
+		}
+	}
+	return nil, fmt.Errorf("field %s not found", name)
+}
+
 func (t *StructType) String() string {
 	sb := &strings.Builder{}
 	sb.WriteString("StructType<")

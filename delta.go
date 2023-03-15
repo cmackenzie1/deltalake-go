@@ -15,3 +15,13 @@ func formatVersion(version int64) string {
 func formatPart(part int) string {
 	return fmt.Sprintf("%010d", part)
 }
+
+// CommitURIFromVersion returns the commit URI for the given version.
+// The commit URI is the path to the commit file in the delta log,
+// relative to the root of the table.
+//
+//	uri := CommitURIFromVersion(0)
+//	fmt.Println(uri) // _delta_log/00000000000000000000.json
+func CommitURIFromVersion(version int64) string {
+	return fmt.Sprintf("_delta_log/%s.json", formatVersion(version))
+}

@@ -1,12 +1,14 @@
 package deltalake
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+
 	"deltalake/actions"
 	"deltalake/storage"
 	"deltalake/types"
-	"fmt"
-	"github.com/google/uuid"
-	"time"
 )
 
 type TableMetadata struct {
@@ -62,7 +64,15 @@ func (m *TableMetadata) String() string {
 
 // TableState is the state of a delta table.
 type TableState struct {
-	Version int64
+	Version                  int64
+	Files                    []*actions.Add
+	Tombstones               []*actions.Remove
+	CommitInfos              []*actions.CommitInfo
+	MinReaderVersion         int
+	MinWriterVersion         int
+	CurrentMetadata          *TableMetadata
+	TombstoneRetentionMillis int64
+	LogRetentionMillis       int64
 }
 
 type TableConfig struct {
@@ -77,16 +87,16 @@ var DefaultTableConfig = TableConfig{
 
 // Table is a struct that represents a delta table.
 type Table struct {
-	State             TableState
-	Config            TableConfig
+	State             *TableState
+	Config            *TableConfig
 	Storage           storage.ObjectStorage
 	LastCheckpoint    *Checkpoint
 	VersionTimestamps map[int64]int64
 }
 
-func NewTable(storage storage.ObjectStorage, config TableConfig) *Table {
+func NewTable(storage storage.ObjectStorage, config *TableConfig) *Table {
 	return &Table{
-		State: TableState{
+		State: &TableState{
 			Version: -1,
 		},
 		Storage:           storage,
@@ -95,7 +105,7 @@ func NewTable(storage storage.ObjectStorage, config TableConfig) *Table {
 	}
 }
 
-func NewTableWithState(storage storage.ObjectStorage, config TableConfig, state TableState) *Table {
+func NewTableWithState(storage storage.ObjectStorage, config *TableConfig, state *TableState) *Table {
 	return &Table{
 		State:             state,
 		Storage:           storage,
