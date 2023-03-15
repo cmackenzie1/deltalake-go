@@ -1,6 +1,7 @@
 package deltalake
 
 import (
+	"deltalake/actions"
 	"deltalake/storage"
 	"deltalake/types"
 	"fmt"
@@ -16,7 +17,7 @@ type TableMetadata struct {
 	// Description is the user-provided description of the table.
 	Description string
 	// Format is the format of the table. Default is "parquet".
-	Format Format
+	Format actions.Format
 	// Schema is the types of the table.
 	Schema types.StructType
 	// PartitionColumns is an	 ordered list of partition columns.
@@ -30,7 +31,7 @@ type TableMetadata struct {
 func NewTableMetadata(
 	name string,
 	description string,
-	format Format,
+	format actions.Format,
 	schema types.StructType,
 	partitionColumns []string,
 	configuration map[string]string,
