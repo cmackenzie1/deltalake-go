@@ -2,8 +2,9 @@ package actions
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRemove_MarshalUnmarshalJSON(t *testing.T) {

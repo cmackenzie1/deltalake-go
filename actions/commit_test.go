@@ -2,8 +2,9 @@ package actions
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommitInfo_MarshalUnmarhshalJSON(t *testing.T) {
