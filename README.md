@@ -1,4 +1,4 @@
-# delta-go
+# deltalake-go
 
 An implementation of the [Delta Lake](https://delta.io/) [specification](https://github.com/delta-io/delta/blob/master/PROTOCOL.md#schema-serialization-format)
 in Go.
