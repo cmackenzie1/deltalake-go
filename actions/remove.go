@@ -2,6 +2,9 @@ package actions
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/segmentio/parquet-go"
 )
 
 var _ Action = (*Remove)(nil)
@@ -84,5 +87,51 @@ func (r *Remove) UnmarshalJSON(data []byte) error {
 	if r.Tags == nil {
 		r.Tags = make(map[string]string)
 	}
+	return nil
+}
+
+func (r *Remove) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	if r.PartitionValues == nil {
+
+	}
+	if r.Tags == nil {
+		r.Tags = make(map[string]string)
+	}
+
+	path, ok := schema.Lookup("remove", "path")
+	if !ok {
+		return fmt.Errorf("could not find path in schema")
+	}
+
+	deletionTimestamp, ok := schema.Lookup("remove", "deletionTimestamp")
+	if !ok {
+		return fmt.Errorf("could not find deletionTimestamp in schema")
+	}
+
+	dataChange, ok := schema.Lookup("remove", "dataChange")
+	if !ok {
+		return fmt.Errorf("could not find dataChange in schema")
+	}
+
+	extendedFileMeta, ok := schema.Lookup("remove", "extendedFileMetadata")
+	if !ok {
+		return fmt.Errorf("could not find extendedFileMetadata in schema")
+	}
+
+	size, ok := schema.Lookup("remove", "size")
+	if !ok {
+		return fmt.Errorf("could not find size in schema")
+	}
+
+	*r = Remove{
+		Path:                 row[path.ColumnIndex].String(),
+		DeletionTimestamp:    row[deletionTimestamp.ColumnIndex].Int64(),
+		DataChange:           row[dataChange.ColumnIndex].Boolean(),
+		ExtendedFileMetadata: row[extendedFileMeta.ColumnIndex].Boolean(),
+		Size:                 row[size.ColumnIndex].Int64(),
+		PartitionValues:      make(map[string]string),
+		Tags:                 make(map[string]string),
+	}
+
 	return nil
 }

@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var (
+	ErrNotFound = fmt.Errorf("not found")
+)
+
 type ObjectInfo struct {
 	Path         string
 	Size         int64

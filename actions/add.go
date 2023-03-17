@@ -1,6 +1,11 @@
 package actions
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/segmentio/parquet-go"
+)
 
 var _ Action = (*Add)(nil)
 
@@ -79,5 +84,38 @@ func (a *Add) UnmarshalJSON(data []byte) error {
 	if a.Tags == nil {
 		a.Tags = make(map[string]string)
 	}
+	return nil
+}
+
+func (a *Add) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	path, ok := schema.Lookup("add", "path")
+	if !ok {
+		return fmt.Errorf("path not found in schema")
+	}
+
+	size, ok := schema.Lookup("add", "size")
+	if !ok {
+		return fmt.Errorf("size not found in schema")
+	}
+
+	dataChange, ok := schema.Lookup("add", "dataChange")
+	if !ok {
+		return fmt.Errorf("dataChange not found in schema")
+	}
+
+	modificationTime, ok := schema.Lookup("add", "modificationTime")
+	if !ok {
+		return fmt.Errorf("modificationTime not found in schema")
+	}
+
+	// TODO: handle stats, tags and partitionValues
+
+	*a = Add{
+		Path:             row[path.ColumnIndex].String(),
+		Size:             row[size.ColumnIndex].Int64(),
+		DataChange:       row[dataChange.ColumnIndex].Boolean(),
+		ModificationTime: row[modificationTime.ColumnIndex].Int64(),
+	}
+
 	return nil
 }

@@ -1,6 +1,10 @@
 package actions
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/segmentio/parquet-go"
+)
 
 var _ Action = (*CDC)(nil)
 
@@ -64,5 +68,30 @@ func (c *CDC) UnmarshalJSON(data []byte) error {
 	if c.Tags == nil {
 		c.Tags = make(map[string]string)
 	}
+	return nil
+}
+
+func (c *CDC) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	path, ok := schema.Lookup("cdc", "path")
+	if !ok {
+		return nil
+	}
+
+	size, ok := schema.Lookup("cdc", "size")
+	if !ok {
+		return nil
+	}
+
+	dataChange, ok := schema.Lookup("cdc", "dataChange")
+	if !ok {
+		return nil
+	}
+
+	*c = CDC{
+		Path:       row[path.ColumnIndex].String(),
+		Size:       row[size.ColumnIndex].Int64(),
+		DataChange: row[dataChange.ColumnIndex].Boolean(),
+	}
+
 	return nil
 }

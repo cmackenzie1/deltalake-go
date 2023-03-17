@@ -5,6 +5,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 var _ ObjectStorage = &LocalStorage{}
@@ -22,6 +25,7 @@ func NewLocalStorage(rootDir string) (*LocalStorage, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Debug().Str("rootDir", rootDir).Msg("opened local storage")
 	return &LocalStorage{
 		rootDir: rootDir,
 	}, nil
@@ -56,23 +60,49 @@ func (l *LocalStorage) Put(path string, data io.Reader) error {
 		return err
 	}
 
+	log.Debug().Str("path", path).Msg("put file")
 	return nil
+}
+
+// exists returns true if the path exists.
+// it expects the path to be absolute from l.fullpath()
+func (l *LocalStorage) exists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }
 
 func (l *LocalStorage) Get(path string) (io.ReadCloser, error) {
 	path = l.fullpath(path)
+	if !l.exists(path) {
+		log.Debug().
+			Str("path", path).
+			Str("action", "get").
+			Msg("file not found")
+
+		return nil, ErrNotFound
+	}
+	log.Debug().Str("path", path).Msg("get file")
 	return os.Open(path)
 }
 
 func (l *LocalStorage) Head(path string) (ObjectInfo, error) {
 	path = l.fullpath(path)
+	if !l.exists(path) {
+		log.Debug().
+			Str("path", path).
+			Str("action", "head").
+			Msg("file not found")
+		return ObjectInfo{}, ErrNotFound
+	}
+
 	info, err := os.Stat(path)
 	if err != nil {
 		return ObjectInfo{}, err
 	}
 
+	log.Debug().Str("path", path).Msg("head file")
 	return ObjectInfo{
-		Path:         path,
+		Path:         strings.TrimPrefix(path, l.rootDir),
 		Size:         info.Size(),
 		LastModified: info.ModTime(),
 	}, nil
@@ -80,30 +110,32 @@ func (l *LocalStorage) Head(path string) (ObjectInfo, error) {
 }
 
 func (l *LocalStorage) Delete(path string) error {
+	log.Debug().Str("path", path).Msg("delete file")
 	return os.Remove(l.fullpath(path))
 }
 
 func (l *LocalStorage) List(prefix string) ([]ObjectInfo, error) {
 	// Find all files with the prefix.
-	fis, err := filepath.Glob(l.fullpath(prefix) + "*")
+	// Read file info for each file.
+	var infos []ObjectInfo
+
+	// Find all files with the prefix.
+	err := filepath.Walk(l.fullpath(prefix), func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			infos = append(infos, ObjectInfo{
+				Path:         strings.TrimPrefix(path, l.rootDir),
+				Size:         info.Size(),
+				LastModified: info.ModTime(),
+			})
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// Read file info for each file.
-	var a []ObjectInfo
-	for _, fi := range fis {
-		info, err := os.Stat(fi)
-		if err != nil {
-			return nil, err
-		}
-
-		a = append(a, ObjectInfo{
-			Path:         fi,
-			Size:         info.Size(),
-			LastModified: info.ModTime(),
-		})
-	}
-
-	return a, nil
+	log.Debug().Str("prefix", prefix).
+		Int("count", len(infos)).
+		Msg("list files")
+	return infos, nil
 }

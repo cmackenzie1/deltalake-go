@@ -2,6 +2,9 @@ package actions
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/segmentio/parquet-go"
 )
 
 var _ Action = (*Protocol)(nil)
@@ -43,5 +46,30 @@ func (t *Transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*t = Transaction(*w.Transaction)
+	return nil
+}
+
+func (t *Transaction) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	appId, ok := schema.Lookup("txn", "appId")
+	if !ok {
+		return fmt.Errorf("could not find appId in schema")
+	}
+
+	version, ok := schema.Lookup("txn", "version")
+	if !ok {
+		return fmt.Errorf("could not find version in schema")
+	}
+
+	lastUpdated, ok := schema.Lookup("txn", "lastUpdated")
+	if !ok {
+		return fmt.Errorf("could not find lastUpdated in schema")
+	}
+
+	*t = Transaction{
+		AppID:       row[appId.ColumnIndex].String(),
+		Version:     row[version.ColumnIndex].Int64(),
+		LastUpdated: row[lastUpdated.ColumnIndex].Int64(),
+	}
+
 	return nil
 }
