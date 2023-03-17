@@ -62,32 +62,12 @@ func (r *Remove) pathDecoded() (string, error) {
 	return decodePath(r.Path)
 }
 
-// MarshalJSON marshals the remove action to JSON.
-// The data wrapped in the key "remove".
-func (r *Remove) MarshalJSON() ([]byte, error) {
-	type Alias Remove // prevent recursion
-	return json.Marshal(map[string]interface{}{
-		"remove": (*Alias)(r),
-	})
-}
-
 // UnmarshalJSON unmarshals the remove action from JSON.
 func (r *Remove) UnmarshalJSON(data []byte) error {
+	r.Tags = make(map[string]string)
+	r.PartitionValues = make(map[string]string)
 	type Alias Remove // prevent recursion
-	var wrapper struct {
-		Remove *Alias `json:"remove"`
-	}
-	if err := json.Unmarshal(data, &wrapper); err != nil {
-		return err
-	}
-	*r = Remove(*wrapper.Remove)
-	if r.PartitionValues == nil {
-		r.PartitionValues = make(map[string]string)
-	}
-	if r.Tags == nil {
-		r.Tags = make(map[string]string)
-	}
-	return nil
+	return json.Unmarshal(data, (*Alias)(r))
 }
 
 func (r *Remove) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {

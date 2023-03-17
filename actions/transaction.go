@@ -27,26 +27,10 @@ func NewTransaction(appID string, version int64, lastUpdated int64) *Transaction
 	}
 }
 
-// MarshalJSON marshals the transaction action to JSON.
-// The data wrapped in the key "txn".
-func (t *Transaction) MarshalJSON() ([]byte, error) {
-	type Alias Transaction // prevent recursion
-	return json.Marshal(map[string]interface{}{
-		"txn": (*Alias)(t),
-	})
-}
-
 // UnmarshalJSON unmarshals the transaction action from JSON.
 func (t *Transaction) UnmarshalJSON(data []byte) error {
 	type Alias Transaction // prevent recursion
-	var w struct {
-		Transaction *Alias `json:"txn"`
-	}
-	if err := json.Unmarshal(data, &w); err != nil {
-		return err
-	}
-	*t = Transaction(*w.Transaction)
-	return nil
+	return json.Unmarshal(data, (*Alias)(t))
 }
 
 func (t *Transaction) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {

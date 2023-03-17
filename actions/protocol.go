@@ -33,26 +33,10 @@ func (p *Protocol) Name() string {
 	return "protocol"
 }
 
-// MarshalJSON marshals the protocol action to JSON.
-// The data wrapped in the key "protocol".
-func (p *Protocol) MarshalJSON() ([]byte, error) {
-	type Alias Protocol // prevent recursion
-	return json.Marshal(map[string]interface{}{
-		"protocol": (*Alias)(p),
-	})
-}
-
 // UnmarshalJSON unmarshals the protocol action from JSON.
 func (p *Protocol) UnmarshalJSON(data []byte) error {
 	type Alias Protocol // prevent recursion
-	var wrapper struct {
-		Protocol *Alias `json:"protocol"`
-	}
-	if err := json.Unmarshal(data, &wrapper); err != nil {
-		return err
-	}
-	*p = Protocol(*wrapper.Protocol)
-	return nil
+	return json.Unmarshal(data, (*Alias)(p))
 }
 
 func (p *Protocol) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {

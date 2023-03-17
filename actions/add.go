@@ -55,36 +55,13 @@ func (a *Add) pathDecoded() (string, error) {
 	return decodePath(a.Path)
 }
 
-// MarshalJSON marshals the add action to JSON.
-// The data wrapped in the key "add".
-func (a *Add) MarshalJSON() ([]byte, error) {
-	type Alias Add // prevent recursion
-	return json.Marshal(map[string]interface{}{
-		"add": (*Alias)(a),
-	})
-}
-
 // UnmarshalJSON unmarshals the add action from JSON.
 // The data to unmarshal is wrapped in the key "add".
 func (a *Add) UnmarshalJSON(data []byte) error {
+	a.Tags = make(map[string]string)
+	a.PartitionValues = make(map[string]string)
 	type Alias Add // prevent recursion
-	var wrapper struct {
-		Add *Alias `json:"add"`
-	}
-	if err := json.Unmarshal(data, &wrapper); err != nil {
-		return err
-	}
-	*a = Add(*wrapper.Add)
-
-	// Because of the way the JSON is unmarshaled, the maps will be nil if they are empty, so we need to
-	// initialize them to empty maps.
-	if a.PartitionValues == nil {
-		a.PartitionValues = make(map[string]string)
-	}
-	if a.Tags == nil {
-		a.Tags = make(map[string]string)
-	}
-	return nil
+	return json.Unmarshal(data, (*Alias)(a))
 }
 
 func (a *Add) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {

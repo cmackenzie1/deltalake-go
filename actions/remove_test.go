@@ -14,17 +14,17 @@ func TestRemove_MarshalUnmarshalJSON(t *testing.T) {
 	}{
 		"empty": {
 			remove:   NewRemove("", 0, false, false, nil, 0, nil),
-			wantJSON: `{"remove":{"path":"","dataChange":false}}`,
+			wantJSON: `{"path":"","dataChange":false}`,
 		},
 		"full": {
 			//Example from https://github.com/delta-io/delta/blob/master/PROTOCOL.md#add-file-and-remove-file
 			remove:   NewRemove("part-00001-9.snappy.parquet", 1515488792485, true, false, nil, 0, nil),
-			wantJSON: `{"remove":{"path":"part-00001-9.snappy.parquet","deletionTimestamp":1515488792485,"dataChange":true}}`,
+			wantJSON: `{"path":"part-00001-9.snappy.parquet","deletionTimestamp":1515488792485,"dataChange":true}`,
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotJSON, err := test.remove.MarshalJSON()
+			gotJSON, err := json.Marshal(test.remove)
 			require.NoErrorf(t, err, "Remove.MarshalJSON() failed with error: %v", err)
 			require.JSONEq(t, test.wantJSON, string(gotJSON))
 			t.Logf("Remove.MarshalJSON() = %s", string(gotJSON))

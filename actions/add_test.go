@@ -14,11 +14,11 @@ func TestAdd_MarshalUnmarshalJSON(t *testing.T) {
 	}{
 		"empty": {
 			add:      NewAdd("", 0, nil, false, 0, nil, nil),
-			wantJSON: `{"add":{"path":"","size":0,"partitionValues":{},"dataChange":false,"modificationTime":0}}`,
+			wantJSON: `{"path":"","size":0,"partitionValues":{},"dataChange":false,"modificationTime":0}`,
 		},
 		"full": {
 			add:      NewAdd("date=2017-12-10/part-000...c000.gz.parquet", 841454, map[string]string{"date": "2017-12-10"}, true, 1512909768000, nil, nil),
-			wantJSON: `{"add":{"path":"date=2017-12-10/part-000...c000.gz.parquet","partitionValues":{"date":"2017-12-10"},"size":841454,"modificationTime":1512909768000,"dataChange":true}}`,
+			wantJSON: `{"path":"date=2017-12-10/part-000...c000.gz.parquet","partitionValues":{"date":"2017-12-10"},"size":841454,"modificationTime":1512909768000,"dataChange":true}`,
 		},
 	}
 	for name, test := range tests {

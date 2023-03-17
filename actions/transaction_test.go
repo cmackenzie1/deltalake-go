@@ -14,17 +14,17 @@ func TestTransaction_MarshalUnmarshalJSONt(t *testing.T) {
 	}{
 		"empty": {
 			transaction: NewTransaction("", 0, 0),
-			wantJSON:    `{"txn":{"appId":"","version":0}}`,
+			wantJSON:    `{"appId":"","version":0}`,
 		},
 		"full": {
 			// Example from https://github.com/delta-io/delta/blob/master/PROTOCOL.md#transaction-identifiers
 			transaction: NewTransaction("3ba13872-2d47-4e17-86a0-21afd2a22395", 364475, 0),
-			wantJSON:    `{"txn":{"appId":"3ba13872-2d47-4e17-86a0-21afd2a22395","version":364475}}`,
+			wantJSON:    `{"appId":"3ba13872-2d47-4e17-86a0-21afd2a22395","version":364475}`,
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotJSON, err := test.transaction.MarshalJSON()
+			gotJSON, err := json.Marshal(test.transaction)
 			require.NoErrorf(t, err, "Transaction.MarshalJSON() failed with error: %v", err)
 			require.JSONEq(t, test.wantJSON, string(gotJSON))
 			t.Logf("Transaction.MarshalJSON() = %s", gotJSON)
