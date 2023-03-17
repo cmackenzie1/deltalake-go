@@ -1,6 +1,11 @@
 package actions
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/segmentio/parquet-go"
+)
 
 var _ Action = (*Metadata)(nil)
 
@@ -74,5 +79,44 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = Metadata(*wrapper.Metadata)
+	return nil
+}
+
+func (m *Metadata) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	id, ok := schema.Lookup("metaData", "id")
+	if !ok {
+		return fmt.Errorf("could not find id in schema")
+	}
+
+	name, ok := schema.Lookup("metaData", "name")
+	if !ok {
+		return fmt.Errorf("could not find name in schema")
+	}
+
+	description, ok := schema.Lookup("metaData", "description")
+	if !ok {
+		return fmt.Errorf("could not find description in schema")
+	}
+
+	schemaString, ok := schema.Lookup("metaData", "schemaString")
+	if !ok {
+		return fmt.Errorf("could not find schemaString in schema")
+	}
+
+	// TODO: format
+
+	createdTime, ok := schema.Lookup("metaData", "createdTime")
+	if !ok {
+		return fmt.Errorf("could not find createdTime in schema")
+	}
+
+	*m = Metadata{
+		ID:           row[id.ColumnIndex].String(),
+		TableName:    row[name.ColumnIndex].String(),
+		Description:  row[description.ColumnIndex].String(),
+		SchemaString: row[schemaString.ColumnIndex].String(),
+		CreatedTime:  row[createdTime.ColumnIndex].Int64(),
+	}
+
 	return nil
 }

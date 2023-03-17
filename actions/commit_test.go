@@ -34,6 +34,18 @@ func TestCommitInfo_MarshalUnmarhshalJSON(t *testing.T) {
 			}),
 			wantJSON: `{"commitInfo":{"timestamp":1515491537026,"userId":"100121","userName":"michael@databricks.com","operation":"INSERT","operationParameters":{"mode":"Append","partitionBy":"[]"},"notebook":{"notebookId":"4443029","notebookPath":"Users/michael@databricks.com/actions"},"clusterId":"1027-202406-pooh991"}}`,
 		},
+		"tbd": {
+			commitInfo: CommitInfo(map[string]interface{}{
+				"timestamp": float64(1587968586154), // Loses type information when unmarshalling into map[string]interface{} as an int64
+				"operation": "WRITE",
+				"operationParameters": map[string]interface{}{
+					"mode":        "ErrorIfExists",
+					"partitionBy": "[]",
+				},
+				"isBlindAppend": true,
+			}),
+			wantJSON: `{"commitInfo":{"timestamp":1587968586154,"operation":"WRITE","operationParameters":{"mode":"ErrorIfExists","partitionBy":"[]"},"isBlindAppend":true}}`,
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {

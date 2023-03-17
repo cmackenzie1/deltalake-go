@@ -1,6 +1,11 @@
 package actions
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/segmentio/parquet-go"
+)
 
 var _ Action = (*Protocol)(nil)
 
@@ -47,5 +52,24 @@ func (p *Protocol) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = Protocol(*wrapper.Protocol)
+	return nil
+}
+
+func (p *Protocol) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	minReaderVersion, ok := schema.Lookup("protocol", "minReaderVersion")
+	if !ok {
+		return fmt.Errorf("could not find minReaderVersion in schema")
+	}
+
+	minWriterVersion, ok := schema.Lookup("protocol", "minWriterVersion")
+	if !ok {
+		return fmt.Errorf("could not find minWriterVersion in schema")
+	}
+
+	*p = Protocol{
+		MinReaderVersion: int(row[minReaderVersion.ColumnIndex].Int32()),
+		MinWriterVersion: int(row[minWriterVersion.ColumnIndex].Int32()),
+	}
+
 	return nil
 }

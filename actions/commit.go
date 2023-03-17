@@ -2,6 +2,8 @@ package actions
 
 import (
 	"encoding/json"
+
+	"github.com/segmentio/parquet-go"
 )
 
 var _ Action = (*CommitInfo)(nil)
@@ -32,5 +34,12 @@ func (c *CommitInfo) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CommitInfo(*wrapper.CommitInfo)
+	return nil
+}
+
+// UnmarshalParquet is a custom Parquet unmarshaler for CommitInfo.
+func (c *CommitInfo) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	// TODO: how to read the commitInfo map?
+	*c = CommitInfo{}
 	return nil
 }
