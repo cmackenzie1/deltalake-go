@@ -49,6 +49,9 @@ func (c *CDC) UnmarshalJSON(data []byte) error {
 }
 
 func (c *CDC) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	c.Tags = make(map[string]string)
+	c.PartitionValues = make(map[string]string)
+
 	path, ok := schema.Lookup("cdc", "path")
 	if !ok {
 		return nil
@@ -64,11 +67,9 @@ func (c *CDC) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
 		return nil
 	}
 
-	*c = CDC{
-		Path:       row[path.ColumnIndex].String(),
-		Size:       row[size.ColumnIndex].Int64(),
-		DataChange: row[dataChange.ColumnIndex].Boolean(),
-	}
+	c.Path = row[path.ColumnIndex].String()
+	c.Size = row[size.ColumnIndex].Int64()
+	c.DataChange = row[dataChange.ColumnIndex].Boolean()
 
 	return nil
 }

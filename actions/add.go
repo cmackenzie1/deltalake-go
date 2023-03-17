@@ -65,6 +65,9 @@ func (a *Add) UnmarshalJSON(data []byte) error {
 }
 
 func (a *Add) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	a.Tags = make(map[string]string)
+	a.PartitionValues = make(map[string]string)
+
 	path, ok := schema.Lookup("add", "path")
 	if !ok {
 		return fmt.Errorf("path not found in schema")
@@ -87,12 +90,10 @@ func (a *Add) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
 
 	// TODO: handle stats, tags and partitionValues
 
-	*a = Add{
-		Path:             row[path.ColumnIndex].String(),
-		Size:             row[size.ColumnIndex].Int64(),
-		DataChange:       row[dataChange.ColumnIndex].Boolean(),
-		ModificationTime: row[modificationTime.ColumnIndex].Int64(),
-	}
+	a.Path = row[path.ColumnIndex].String()
+	a.Size = row[size.ColumnIndex].Int64()
+	a.DataChange = row[dataChange.ColumnIndex].Boolean()
+	a.ModificationTime = row[modificationTime.ColumnIndex].Int64()
 
 	return nil
 }
