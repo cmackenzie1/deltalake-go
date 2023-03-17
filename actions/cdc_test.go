@@ -14,17 +14,17 @@ func TestCDC_MarshalUnmarshalJSON(t *testing.T) {
 	}{
 		"empty": {
 			cdc:      NewCDC("", nil, 0, false, nil),
-			wantJSON: `{"cdc":{"path":"","dataChange":false,"partitionValues":{},"size":0}}`,
+			wantJSON: `{"path":"","dataChange":false,"partitionValues":{},"size":0}`,
 		},
 		"full": {
 			// Example from https://github.com/delta-io/delta/blob/master/PROTOCOL.md#add-cdc-file
 			cdc:      NewCDC("_change_data/cdc-00001-c.snappy.parquet", map[string]string{}, 1213, false, nil),
-			wantJSON: `{"cdc":{"path":"_change_data/cdc-00001-c.snappy.parquet","partitionValues":{},"size":1213,"dataChange":false}}`,
+			wantJSON: `{"path":"_change_data/cdc-00001-c.snappy.parquet","partitionValues":{},"size":1213,"dataChange":false}`,
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotJSON, err := test.cdc.MarshalJSON()
+			gotJSON, err := json.Marshal(test.cdc)
 			require.NoErrorf(t, err, "CDC.MarshalJSON() failed with error: %v", err)
 			require.JSONEq(t, test.wantJSON, string(gotJSON))
 			t.Logf("CDC.MarshalJSON() = %s", string(gotJSON))

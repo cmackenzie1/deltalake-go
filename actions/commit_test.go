@@ -14,7 +14,7 @@ func TestCommitInfo_MarshalUnmarhshalJSON(t *testing.T) {
 	}{
 		"empty": {
 			commitInfo: CommitInfo(map[string]interface{}{}),
-			wantJSON:   `{"commitInfo":{}}`,
+			wantJSON:   `{}`,
 		},
 		"full": { // Example from https://github.com/delta-io/delta/blob/master/PROTOCOL.md#commit-provenance-information
 			commitInfo: CommitInfo(map[string]interface{}{
@@ -32,7 +32,7 @@ func TestCommitInfo_MarshalUnmarhshalJSON(t *testing.T) {
 				},
 				"clusterId": "1027-202406-pooh991",
 			}),
-			wantJSON: `{"commitInfo":{"timestamp":1515491537026,"userId":"100121","userName":"michael@databricks.com","operation":"INSERT","operationParameters":{"mode":"Append","partitionBy":"[]"},"notebook":{"notebookId":"4443029","notebookPath":"Users/michael@databricks.com/actions"},"clusterId":"1027-202406-pooh991"}}`,
+			wantJSON: `{"timestamp":1515491537026,"userId":"100121","userName":"michael@databricks.com","operation":"INSERT","operationParameters":{"mode":"Append","partitionBy":"[]"},"notebook":{"notebookId":"4443029","notebookPath":"Users/michael@databricks.com/actions"},"clusterId":"1027-202406-pooh991"}`,
 		},
 		"tbd": {
 			commitInfo: CommitInfo(map[string]interface{}{
@@ -44,12 +44,12 @@ func TestCommitInfo_MarshalUnmarhshalJSON(t *testing.T) {
 				},
 				"isBlindAppend": true,
 			}),
-			wantJSON: `{"commitInfo":{"timestamp":1587968586154,"operation":"WRITE","operationParameters":{"mode":"ErrorIfExists","partitionBy":"[]"},"isBlindAppend":true}}`,
+			wantJSON: `{"timestamp":1587968586154,"operation":"WRITE","operationParameters":{"mode":"ErrorIfExists","partitionBy":"[]"},"isBlindAppend":true}`,
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			got, err := test.commitInfo.MarshalJSON()
+			got, err := json.Marshal(test.commitInfo)
 			require.NoErrorf(t, err, "CommitInfo.MarshalJSON() error = %v", err)
 			require.JSONEq(t, test.wantJSON, string(got), "CommitInfo.MarshalJSON() = %v, wantJSON %v", string(got), test.wantJSON)
 			t.Logf("CommitInfo.MarshalJSON() = %v", string(got))

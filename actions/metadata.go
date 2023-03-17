@@ -60,26 +60,12 @@ func (m *Metadata) Name() string {
 	return "metaData"
 }
 
-// MarshalJSON is a custom JSON marshaller for the Metadata struct.
-// The data wrapped in the key "metaData".
-func (m *Metadata) MarshalJSON() ([]byte, error) {
-	type Alias Metadata
-	return json.Marshal(map[string]interface{}{
-		"metaData": (*Alias)(m),
-	})
-}
-
 // UnmarshalJSON is a custom JSON unmarshaller for the Metadata struct.
 func (m *Metadata) UnmarshalJSON(data []byte) error {
-	type Alias Metadata
-	var wrapper struct {
-		Metadata *Alias `json:"metaData"`
-	}
-	if err := json.Unmarshal(data, &wrapper); err != nil {
-		return err
-	}
-	*m = Metadata(*wrapper.Metadata)
-	return nil
+	m.Configuration = make(map[string]string)
+	m.PartitionColumns = make([]string, 0)
+	type Alias Metadata // prevent recursion
+	return json.Unmarshal(data, (*Alias)(m))
 }
 
 func (m *Metadata) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
