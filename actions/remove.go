@@ -71,12 +71,8 @@ func (r *Remove) UnmarshalJSON(data []byte) error {
 }
 
 func (r *Remove) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
-	if r.PartitionValues == nil {
-
-	}
-	if r.Tags == nil {
-		r.Tags = make(map[string]string)
-	}
+	r.Tags = make(map[string]string)
+	r.PartitionValues = make(map[string]string)
 
 	path, ok := schema.Lookup("remove", "path")
 	if !ok {
@@ -103,15 +99,11 @@ func (r *Remove) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error
 		return fmt.Errorf("could not find size in schema")
 	}
 
-	*r = Remove{
-		Path:                 row[path.ColumnIndex].String(),
-		DeletionTimestamp:    row[deletionTimestamp.ColumnIndex].Int64(),
-		DataChange:           row[dataChange.ColumnIndex].Boolean(),
-		ExtendedFileMetadata: row[extendedFileMeta.ColumnIndex].Boolean(),
-		Size:                 row[size.ColumnIndex].Int64(),
-		PartitionValues:      make(map[string]string),
-		Tags:                 make(map[string]string),
-	}
+	r.Path = row[path.ColumnIndex].String()
+	r.DeletionTimestamp = row[deletionTimestamp.ColumnIndex].Int64()
+	r.DataChange = row[dataChange.ColumnIndex].Boolean()
+	r.ExtendedFileMetadata = row[extendedFileMeta.ColumnIndex].Boolean()
+	r.Size = row[size.ColumnIndex].Int64()
 
 	return nil
 }

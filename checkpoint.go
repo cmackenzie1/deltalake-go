@@ -39,10 +39,20 @@ func ListCheckpointParts(checkpoint *Checkpoint) []string {
 	return parts
 }
 
+// checkpointPath returns the path of the checkpoint file.
+// This does not check if the file exists in the storage. It only returns the
+// path that should be used.
+//
+//	"_delta_log/00000000000000000010.checkpoint.parquet"
 func checkpointPath(version int64) string {
-	return fmt.Sprintf("_delta_log/%020d.checkpoint.parquet", version) // "00000000000000000010.checkpoint.parquet"
+	return fmt.Sprintf("%s/%020d.checkpoint.parquet", LogDirName, version)
 }
 
+// checkpointPartPath returns the path of the checkpoint part file.
+// This does not check if the file exists in the storage. It only returns the
+// path that should be used.
+//
+//	"_delta_log/00000000000000000010.checkpoint.0000000001.0000000003.parquet"
 func checkpointPartPath(version int64, part, parts int) string {
-	return fmt.Sprintf("_delta_log/%020d.checkpoint.%010d.%010d.parquet", version, part, parts) // "00000000000000000010.checkpoint.0000000001.0000000003.parquet"
+	return fmt.Sprintf("%s/%020d.checkpoint.%010d.%010d.parquet", LogDirName, version, part, parts)
 }

@@ -49,11 +49,9 @@ func (t *Transaction) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) 
 		return fmt.Errorf("could not find lastUpdated in schema")
 	}
 
-	*t = Transaction{
-		AppID:       row[appId.ColumnIndex].String(),
-		Version:     row[version.ColumnIndex].Int64(),
-		LastUpdated: row[lastUpdated.ColumnIndex].Int64(),
-	}
+	t.AppID = row[appId.ColumnIndex].String()
+	t.Version = row[version.ColumnIndex].Int64()
+	t.LastUpdated = row[lastUpdated.ColumnIndex].Int64()
 
 	return nil
 }

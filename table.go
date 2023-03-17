@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"path"
 
 	"github.com/rs/zerolog/log"
 
@@ -195,7 +196,7 @@ func (t *Table) peakNextCommit(currentVersion int64) ([]actions.Action, error) {
 }
 
 func (t *Table) MostRecentCheckpoint() (*Checkpoint, error) {
-	uri := "_delta_log/_last_checkpoint"
+	uri := path.Join(LogDirName, LastCheckpointFileName)
 	log.Debug().Str("uri", uri).Msg("loading checkpoint")
 	check, err := t.Storage.Get(uri)
 	if err != nil {

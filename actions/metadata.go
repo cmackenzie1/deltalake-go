@@ -69,6 +69,9 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 }
 
 func (m *Metadata) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
+	m.Configuration = make(map[string]string)
+	m.PartitionColumns = make([]string, 0)
+
 	id, ok := schema.Lookup("metaData", "id")
 	if !ok {
 		return fmt.Errorf("could not find id in schema")
@@ -96,13 +99,11 @@ func (m *Metadata) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) err
 		return fmt.Errorf("could not find createdTime in schema")
 	}
 
-	*m = Metadata{
-		ID:           row[id.ColumnIndex].String(),
-		TableName:    row[name.ColumnIndex].String(),
-		Description:  row[description.ColumnIndex].String(),
-		SchemaString: row[schemaString.ColumnIndex].String(),
-		CreatedTime:  row[createdTime.ColumnIndex].Int64(),
-	}
-
+	m.ID = row[id.ColumnIndex].String()
+	m.TableName = row[name.ColumnIndex].String()
+	m.Description = row[description.ColumnIndex].String()
+	m.SchemaString = row[schemaString.ColumnIndex].String()
+	m.CreatedTime = row[createdTime.ColumnIndex].Int64()
+	
 	return nil
 }

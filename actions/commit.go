@@ -15,7 +15,6 @@ func (c *CommitInfo) Name() string {
 
 // UnmarshalParquet is a custom Parquet unmarshaler for CommitInfo.
 func (c *CommitInfo) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) error {
-	// TODO: how to read the commitInfo map?
-	*c = CommitInfo{}
+	*c = make(map[string]interface{})
 	return nil
 }

@@ -50,10 +50,10 @@ func (p *Protocol) UnmarshalParquet(schema *parquet.Schema, row parquet.Row) err
 		return fmt.Errorf("could not find minWriterVersion in schema")
 	}
 
-	*p = Protocol{
-		MinReaderVersion: int(row[minReaderVersion.ColumnIndex].Int32()),
-		MinWriterVersion: int(row[minWriterVersion.ColumnIndex].Int32()),
-	}
+	p.MinReaderVersion = int(row[minReaderVersion.ColumnIndex].Int32())
+	p.MinWriterVersion = int(row[minWriterVersion.ColumnIndex].Int32())
+	p.ReaderFeatures = make([]string, 0)
+	p.WriterFeatures = make([]string, 0)
 
 	return nil
 }
